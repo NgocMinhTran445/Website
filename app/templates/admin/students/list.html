@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block page_title %}Quản lý Sinh viên{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <form class="d-flex gap-2" method="GET">
+            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm sinh viên..." 
+                   value="{{ search }}" style="width: 300px;">
+            <button type="submit" class="btn btn-secondary">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+    <a href="{{ url_for('admin.add_student') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Thêm Sinh viên
+    </a>
+</div>
+
+<div class="card fade-in">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Mã SV</th>
+                        <th>Họ và tên</th>
+                        <th>Email</th>
+                        <th>Lớp</th>
+                        <th>Ngành</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students.items %}
+                    <tr>
+                        <td><span class="badge badge-primary">{{ student.student_code }}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="https://ui-avatars.com/api/?name={{ student.full_name }}&background=F59E0B&color=1F2937&size=36" 
+                                     class="rounded-circle me-2" width="36" height="36">
+                                <div>
+                                    <div class="fw-semibold">{{ student.full_name }}</div>
+                                    <small class="text-muted">{{ student.gender or '' }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ student.user.email if student.user else '' }}</td>
+                        <td>{{ student.classroom.name if student.classroom else '-' }}</td>
+                        <td>{{ student.major.name if student.major else '-' }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin.edit_student', id=student.id) }}" class="btn btn-outline-primary" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('admin.delete_student', id=student.id) }}" class="btn btn-outline-danger" 
+                                   onclick="return confirm('Bạn có chắc muốn xóa sinh viên này?')" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fas fa-user-graduate fa-3x mb-3 d-block opacity-50"></i>
+                            Chưa có sinh viên nào
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if students.pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if students.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.students', page=students.prev_num, search=search) }}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for page in students.iter_pages() %}
+            {% if page %}
+                <li class="page-item {% if page == students.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.students', page=page, search=search) }}">{{ page }}</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if students.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.students', page=students.next_num, search=search) }}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

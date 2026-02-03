@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng nhập - {{ app_name }}{% endblock %}
+
+{% block auth_content %}
+<div class="login-page">
+    <div class="login-container">
+        <div class="login-left">
+            <div class="brand-section">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="brand-logo">
+                <h1>{{ app_short_name }}</h1>
+                <p>Quản lý đào tạo hệ trung cấp lý luận chính trị tại Khoa Quản Lý nhà nước về an ninh, trật tự
+</p>
+            </div>
+            
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Quản lý sinh viên & giảng viên</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Theo dõi điểm số & kết quả học tập</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Quản lý lịch học & tài liệu</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Đánh giá giảng viên</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="login-right">
+            <div class="login-form-wrapper">
+                <h2>Chào mừng trở lại!</h2>
+                <p class="text-muted mb-4">Đăng nhập để tiếp tục sử dụng hệ thống</p>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} mb-3">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-user me-2"></i>Tên đăng nhập
+                        </label>
+                        {{ form.username(class="form-control", placeholder="Nhập tên đăng nhập") }}
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.username.errors[0] }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-lock me-2"></i>Mật khẩu
+                        </label>
+                        <div class="password-input">
+                            {{ form.password(class="form-control", placeholder="Nhập mật khẩu", id="password") }}
+                            <button type="button" class="toggle-password" onclick="togglePassword()">
+                                <i class="fas fa-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.password.errors[0] }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            {{ form.remember_me(class="form-check-input") }}
+                            <label class="form-check-label" for="remember_me">Ghi nhớ đăng nhập</label>
+                        </div>
+                        <a href="#" class="forgot-password">Quên mật khẩu?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                    </button>
+                </form>
+                
+                <div class="demo-accounts mt-4">
+                    <p class="text-muted small text-center mb-2">Tài khoản demo:</p>
+                    <div class="demo-list">
+                        <span class="badge bg-dark me-1">admin / admin123</span>
+                        <span class="badge bg-secondary me-1">lecturer1 / 123456</span>
+                        <span class="badge bg-warning text-dark">student1 / 123456</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+        padding: 20px;
+    }
+
+    .login-container {
+        display: flex;
+        max-width: 1000px;
+        width: 100%;
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .login-left {
+        flex: 1;
+        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        padding: 60px 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        color: #1F2937;
+    }
+
+    .brand-section {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .brand-logo {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+        margin: 0 auto 20px;
+        display: block;
+    }
+
+    .brand-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(31, 41, 55, 0.15);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        margin: 0 auto 20px;
+    }
+
+    .brand-section h1 {
+        font-size: 36px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .brand-section p {
+        font-size: 16px;
+        opacity: 0.8;
+    }
+
+    .features-list {
+        margin-top: 30px;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .feature-item i {
+        font-size: 18px;
+    }
+
+    .login-right {
+        flex: 1;
+        padding: 60px 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login-form-wrapper {
+        width: 100%;
+        max-width: 360px;
+    }
+
+    .login-form-wrapper h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1F2937;
+        margin-bottom: 8px;
+    }
+
+    .password-input {
+        position: relative;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6B7280;
+        cursor: pointer;
+    }
+
+    .forgot-password {
+        color: #F59E0B;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .forgot-password:hover {
+        color: #D97706;
+        text-decoration: underline;
+    }
+
+    .demo-accounts {
+        padding: 16px;
+        background: #F9FAFB;
+        border-radius: 12px;
+    }
+
+    .demo-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+        .login-left {
+            display: none;
+        }
+        
+        .login-container {
+            border-radius: 16px;
+        }
+        
+        .login-right {
+            padding: 40px 30px;
+        }
+    }
+</style>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+</script>
+{% endblock %}

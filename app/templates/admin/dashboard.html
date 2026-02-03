@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block page_title %}Dashboard - Quản trị viên{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card fade-in">
+                <div class="stat-icon primary">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.total_students }}</h3>
+                    <p>Tổng số Sinh viên</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card fade-in" style="animation-delay: 0.1s">
+                <div class="stat-icon success">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.total_lecturers }}</h3>
+                    <p>Tổng số Giảng viên</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card fade-in" style="animation-delay: 0.2s">
+                <div class="stat-icon info">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.total_subjects }}</h3>
+                    <p>Tổng số Môn học</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card fade-in" style="animation-delay: 0.3s">
+                <div class="stat-icon danger">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.total_classrooms }}</h3>
+                    <p>Tổng số Lớp học</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Students by Major Chart -->
+        <div class="col-lg-8">
+            <div class="card fade-in" style="animation-delay: 0.4s">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-bar me-2 text-warning"></i>Phân bố Sinh viên theo Ngành</span>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-download me-2"></i>Tải báo cáo</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-print me-2"></i>In thống kê</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="studentsByMajorChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grade Distribution -->
+        <div class="col-lg-4">
+            <div class="card fade-in" style="animation-delay: 0.5s">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-2 text-warning"></i>Phân bố Điểm số
+                </div>
+                <div class="card-body">
+                    <canvas id="gradeDistributionChart" height="260"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities & Quick Actions -->
+    <div class="row g-4">
+        <!-- Recent Students -->
+        <div class="col-lg-8">
+            <div class="card fade-in" style="animation-delay: 0.6s">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-user-plus me-2 text-warning"></i>Sinh viên mới đăng ký</span>
+                    <a href="{{ url_for('admin.students') }}" class="btn btn-sm btn-primary">
+                        Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Mã SV</th>
+                                    <th>Họ và tên</th>
+                                    <th>Ngành học</th>
+                                    <th>Lớp</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in recent_students %}
+                                <tr>
+                                    <td><span class="badge badge-primary">{{ student.student_code }}</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://ui-avatars.com/api/?name={{ student.full_name }}&background=F59E0B&color=1F2937&size=36" 
+                                                 class="rounded-circle me-2" width="36" height="36">
+                                            <div>
+                                                <div class="fw-semibold">{{ student.full_name }}</div>
+                                                <small class="text-muted">{{ student.user.email if student.user else '' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ student.major.name if student.major else 'Chưa phân ngành' }}</td>
+                                    <td>{{ student.classroom.name if student.classroom else 'Chưa có lớp' }}</td>
+                                    <td><span class="badge badge-success">Hoạt động</span></td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                        Chưa có sinh viên nào
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="card fade-in" style="animation-delay: 0.7s">
+                <div class="card-header">
+                    <i class="fas fa-bolt me-2 text-warning"></i>Thao tác nhanh
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('admin.add_student') }}" class="quick-action-btn">
+                            <div class="quick-action-icon bg-primary-light">
+                                <i class="fas fa-user-plus text-warning"></i>
+                            </div>
+                            <div class="quick-action-text">
+                                <span class="fw-semibold">Thêm Sinh viên</span>
+                                <small class="text-muted d-block">Tạo tài khoản sinh viên mới</small>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted"></i>
+                        </a>
+                        
+                        <a href="{{ url_for('admin.add_lecturer') }}" class="quick-action-btn">
+                            <div class="quick-action-icon bg-success-light">
+                                <i class="fas fa-chalkboard-teacher text-success"></i>
+                            </div>
+                            <div class="quick-action-text">
+                                <span class="fw-semibold">Thêm Giảng viên</span>
+                                <small class="text-muted d-block">Tạo tài khoản giảng viên</small>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted"></i>
+                        </a>
+                        
+                        <a href="{{ url_for('admin.add_subject') }}" class="quick-action-btn">
+                            <div class="quick-action-icon bg-info-light">
+                                <i class="fas fa-book text-info"></i>
+                            </div>
+                            <div class="quick-action-text">
+                                <span class="fw-semibold">Thêm Môn học</span>
+                                <small class="text-muted d-block">Tạo môn học mới</small>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted"></i>
+                        </a>
+                        
+                        <a href="{{ url_for('admin.add_schedule') }}" class="quick-action-btn">
+                            <div class="quick-action-icon bg-danger-light">
+                                <i class="fas fa-calendar-plus text-danger"></i>
+                            </div>
+                            <div class="quick-action-text">
+                                <span class="fw-semibold">Xếp lịch học</span>
+                                <small class="text-muted d-block">Tạo thời khóa biểu mới</small>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Info -->
+            <div class="card mt-4 fade-in" style="animation-delay: 0.8s">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-2 text-warning"></i>Thông tin hệ thống
+                </div>
+                <div class="card-body">
+                    <div class="system-info-item">
+                        <span class="text-muted">Học kỳ hiện tại:</span>
+                        <span class="fw-semibold">HK2 - 2024</span>
+                    </div>
+                    <div class="system-info-item">
+                        <span class="text-muted">Tổng ngành học:</span>
+                        <span class="fw-semibold">{{ stats.total_majors }}</span>
+                    </div>
+                    <div class="system-info-item">
+                        <span class="text-muted">Tài liệu upload:</span>
+                        <span class="fw-semibold">{{ stats.total_materials }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .quick-action-btn {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: #F9FAFB;
+        border-radius: 12px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s ease;
+    }
+    
+    .quick-action-btn:hover {
+        background: #F3F4F6;
+        transform: translateX(4px);
+        color: inherit;
+    }
+    
+    .quick-action-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    
+    .bg-primary-light { background: rgba(245, 158, 11, 0.15); }
+    .bg-success-light { background: rgba(16, 185, 129, 0.15); }
+    .bg-info-light { background: rgba(59, 130, 246, 0.15); }
+    .bg-danger-light { background: rgba(239, 68, 68, 0.15); }
+    
+    .quick-action-text {
+        flex: 1;
+    }
+    
+    .system-info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #E5E7EB;
+    }
+    
+    .system-info-item:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Students by Major Chart
+    const majorCtx = document.getElementById('studentsByMajorChart').getContext('2d');
+    new Chart(majorCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ major_names|safe }},
+            datasets: [{
+                label: 'Số sinh viên',
+                data: {{ major_counts|safe }},
+                backgroundColor: [
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(139, 92, 246, 0.8)'
+                ],
+                borderColor: [
+                    'rgb(245, 158, 11)',
+                    'rgb(59, 130, 246)',
+                    'rgb(16, 185, 129)',
+                    'rgb(239, 68, 68)',
+                    'rgb(139, 92, 246)'
+                ],
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Grade Distribution Chart
+    const gradeCtx = document.getElementById('gradeDistributionChart').getContext('2d');
+    new Chart(gradeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Xuất sắc (A)', 'Giỏi (B)', 'Khá (C)', 'Trung bình (D)', 'Yếu (F)'],
+            datasets: [{
+                data: {{ grade_distribution|safe }},
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(249, 115, 22, 0.8)',
+                    'rgba(239, 68, 68, 0.8)'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+});
+</script>
+{% endblock %}

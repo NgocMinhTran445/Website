@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block page_title %}Đánh giá Giảng viên{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Pending Evaluations -->
+    <div class="col-lg-6">
+        <div class="card fade-in">
+            <div class="card-header">
+                <i class="fas fa-clipboard-list me-2 text-warning"></i>Chờ đánh giá
+            </div>
+            <div class="card-body">
+                {% if lecturers_to_evaluate %}
+                {% for item in lecturers_to_evaluate %}
+                <div class="eval-item">
+                    <div class="d-flex align-items-center">
+                        <img src="https://ui-avatars.com/api/?name={{ item.lecturer.full_name }}&background=10B981&color=fff&size=48" 
+                             class="rounded-circle me-3" width="48" height="48">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">{{ item.lecturer.full_name }}</h6>
+                            <small class="text-muted">{{ item.subject.name }}</small>
+                        </div>
+                        <a href="{{ url_for('student.add_evaluation', lecturer_id=item.lecturer.id, subject_id=item.subject.id) }}" 
+                           class="btn btn-sm btn-primary">
+                            <i class="fas fa-star me-1"></i>Đánh giá
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-check-circle fa-3x mb-3 opacity-50 text-success"></i>
+                    <p>Bạn đã đánh giá tất cả giảng viên!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- My Evaluations -->
+    <div class="col-lg-6">
+        <div class="card fade-in" style="animation-delay: 0.1s">
+            <div class="card-header">
+                <i class="fas fa-history me-2 text-warning"></i>Đánh giá của tôi
+            </div>
+            <div class="card-body">
+                {% if my_evaluations %}
+                {% for eval in my_evaluations %}
+                <div class="eval-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">{{ eval.lecturer.full_name if eval.lecturer else '-' }}</h6>
+                            <small class="text-muted d-block mb-2">
+                                {{ eval.subject.name if eval.subject else '-' }} | {{ eval.semester }}
+                            </small>
+                            <div class="stars text-warning">
+                                {% for i in range(eval.rating) %}<i class="fas fa-star"></i>{% endfor %}
+                                {% for i in range(5 - eval.rating) %}<i class="far fa-star"></i>{% endfor %}
+                            </div>
+                        </div>
+                        <small class="text-muted">{{ eval.created_at.strftime('%d/%m/%Y') if eval.created_at else '' }}</small>
+                    </div>
+                    {% if eval.comment %}
+                    <p class="text-muted small mt-2 mb-0">{{ eval.comment }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-comment-slash fa-3x mb-3 opacity-50"></i>
+                    <p>Bạn chưa có đánh giá nào</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .eval-item {
+        padding: 16px;
+        background: #F9FAFB;
+        border-radius: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .eval-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .stars {
+        font-size: 14px;
+    }
+</style>
+{% endblock %}

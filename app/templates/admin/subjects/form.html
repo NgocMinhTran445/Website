@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card fade-in">
+            <div class="card-header">
+                <i class="fas fa-book me-2 text-warning"></i>{{ title }}
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Mã môn học <span class="text-danger">*</span></label>
+                            {{ form.code(class="form-control", placeholder="VD: IT001") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số tín chỉ <span class="text-danger">*</span></label>
+                            {{ form.credits(class="form-control", placeholder="3") }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Tên môn học <span class="text-danger">*</span></label>
+                            {{ form.name(class="form-control", placeholder="Nhập tên môn học") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số giờ lý thuyết</label>
+                            {{ form.theory_hours(class="form-control", placeholder="30") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số giờ thực hành</label>
+                            {{ form.practice_hours(class="form-control", placeholder="15") }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Mô tả</label>
+                            {{ form.description(class="form-control", rows="3") }}
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Lưu</button>
+                        <a href="{{ url_for('admin.subjects') }}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block page_title %}Quản lý Môn học{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-4">
+    <a href="{{ url_for('admin.add_subject') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Thêm Môn học
+    </a>
+</div>
+
+<div class="card fade-in">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Mã MH</th>
+                        <th>Tên môn học</th>
+                        <th>Số tín chỉ</th>
+                        <th>Giờ LT</th>
+                        <th>Giờ TH</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject in subjects %}
+                    <tr>
+                        <td><span class="badge badge-primary">{{ subject.code }}</span></td>
+                        <td>{{ subject.name }}</td>
+                        <td><span class="badge bg-warning text-dark">{{ subject.credits }} TC</span></td>
+                        <td>{{ subject.theory_hours or 0 }}</td>
+                        <td>{{ subject.practice_hours or 0 }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin.edit_subject', id=subject.id) }}" class="btn btn-outline-primary"><i class="fas fa-edit"></i></a>
+                                <a href="{{ url_for('admin.delete_subject', id=subject.id) }}" class="btn btn-outline-danger" onclick="return confirm('Xác nhận xóa?')"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">Chưa có môn học nào</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

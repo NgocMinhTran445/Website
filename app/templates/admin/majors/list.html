@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block page_title %}Quản lý Ngành học{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-4">
+    <a href="{{ url_for('admin.add_major') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Thêm Ngành học
+    </a>
+</div>
+
+<div class="row g-4">
+    {% for major in majors %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 fade-in">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="badge badge-primary mb-2">{{ major.code }}</span>
+                        <h5 class="card-title mb-1">{{ major.name }}</h5>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('admin.edit_major', id=major.id) }}"><i class="fas fa-edit me-2"></i>Sửa</a></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('admin.delete_major', id=major.id) }}" onclick="return confirm('Xác nhận xóa?')"><i class="fas fa-trash me-2"></i>Xóa</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="text-muted small mb-3">{{ major.description or 'Chưa có mô tả' }}</p>
+                <div class="d-flex gap-3 text-muted small">
+                    <span><i class="fas fa-user-graduate me-1"></i>{{ major.students.count() }} SV</span>
+                    <span><i class="fas fa-users me-1"></i>{{ major.classrooms.count() }} Lớp</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="text-center py-5 text-muted">
+            <i class="fas fa-book-open fa-3x mb-3 opacity-50"></i>
+            <p>Chưa có ngành học nào</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

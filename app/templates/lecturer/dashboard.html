@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block page_title %}Trang chủ - Giảng viên{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card fade-in">
+                <div class="stat-icon primary">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ total_schedules }}</h3>
+                    <p>Lớp đang giảng dạy</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card fade-in" style="animation-delay: 0.1s">
+                <div class="stat-icon success">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ total_materials }}</h3>
+                    <p>Tài liệu đã upload</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card fade-in" style="animation-delay: 0.2s">
+                <div class="stat-icon info">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ avg_rating }}/5</h3>
+                    <p>Điểm đánh giá TB</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Today's Schedule -->
+        <div class="col-lg-8">
+            <div class="card fade-in" style="animation-delay: 0.3s">
+                <div class="card-header">
+                    <i class="fas fa-clock me-2 text-warning"></i>Lịch dạy hôm nay
+                </div>
+                <div class="card-body">
+                    {% if today_schedules %}
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th>Môn học</th>
+                                    <th>Lớp</th>
+                                    <th>Phòng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in today_schedules %}
+                                <tr>
+                                    <td>
+                                        <span class="badge badge-primary">
+                                            {{ s.start_time.strftime('%H:%M') }} - {{ s.end_time.strftime('%H:%M') }}
+                                        </span>
+                                    </td>
+                                    <td>{{ s.subject.name if s.subject else '-' }}</td>
+                                    <td>{{ s.classroom.name if s.classroom else '-' }}</td>
+                                    <td><i class="fas fa-map-marker-alt me-1 text-muted"></i>{{ s.room_name }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-coffee fa-3x mb-3 opacity-50"></i>
+                        <p>Hôm nay không có lịch dạy!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Evaluations -->
+        <div class="col-lg-4">
+            <div class="card fade-in" style="animation-delay: 0.4s">
+                <div class="card-header">
+                    <i class="fas fa-comments me-2 text-warning"></i>Đánh giá gần đây
+                </div>
+                <div class="card-body">
+                    {% if recent_evaluations %}
+                    {% for eval in recent_evaluations %}
+                    <div class="evaluation-item mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="stars text-warning">
+                                {% for i in range(eval.rating) %}<i class="fas fa-star"></i>{% endfor %}
+                                {% for i in range(5 - eval.rating) %}<i class="far fa-star"></i>{% endfor %}
+                            </div>
+                            <small class="text-muted">{{ eval.created_at.strftime('%d/%m') if eval.created_at else '' }}</small>
+                        </div>
+                        <p class="small text-muted mb-0">{{ eval.comment or 'Không có nhận xét' }}</p>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-comment-slash fa-2x mb-2 opacity-50"></i>
+                        <p class="small">Chưa có đánh giá</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

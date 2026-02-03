@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card fade-in">
+            <div class="card-header">
+                <i class="fas fa-upload me-2 text-warning"></i>{{ title }}
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Môn học <span class="text-danger">*</span></label>
+                        {{ form.subject_id(class="form-select") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                        {{ form.title(class="form-control", placeholder="Nhập tiêu đề tài liệu") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        {{ form.description(class="form-control", rows="3", placeholder="Mô tả ngắn về tài liệu") }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Tệp tin</label>
+                        <div class="upload-area">
+                            {{ form.file(class="form-control") }}
+                            <small class="text-muted d-block mt-2">
+                                Cho phép: PDF, Word, Excel, PowerPoint, ZIP (Tối đa 16MB)
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload me-2"></i>Upload
+                        </button>
+                        <a href="{{ url_for('lecturer.materials') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

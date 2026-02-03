@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block page_title %}Hồ sơ cá nhân{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card fade-in">
+            <div class="card-body text-center py-5">
+                <img src="https://ui-avatars.com/api/?name={{ current_user.get_display_name() }}&background=F59E0B&color=1F2937&size=120" 
+                     class="rounded-circle mb-3" width="120" height="120">
+                <h4 class="mb-1">{{ current_user.get_display_name() }}</h4>
+                <p class="text-muted mb-3">
+                    {% if current_user.is_admin() %}
+                        <span class="badge badge-primary">Quản trị viên</span>
+                    {% elif current_user.is_lecturer() %}
+                        <span class="badge bg-success">Giảng viên</span>
+                    {% else %}
+                        <span class="badge bg-info">Sinh viên</span>
+                    {% endif %}
+                </p>
+                <p class="text-muted small">
+                    <i class="fas fa-envelope me-1"></i>{{ current_user.email }}
+                </p>
+                <hr>
+                <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="card fade-in" style="animation-delay: 0.1s">
+            <div class="card-header">
+                <i class="fas fa-user-circle me-2 text-warning"></i>Thông tin chi tiết
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="text-muted small">Tên đăng nhập</label>
+                        <p class="fw-semibold mb-0">{{ current_user.username }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Email</label>
+                        <p class="fw-semibold mb-0">{{ current_user.email }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Vai trò</label>
+                        <p class="fw-semibold mb-0">
+                            {% if current_user.is_admin() %}Quản trị viên
+                            {% elif current_user.is_lecturer() %}Giảng viên
+                            {% else %}Sinh viên{% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Ngày tạo tài khoản</label>
+                        <p class="fw-semibold mb-0">{{ current_user.created_at.strftime('%d/%m/%Y') if current_user.created_at else 'N/A' }}</p>
+                    </div>
+                    
+                    {% if current_user.is_student() and current_user.student %}
+                    <div class="col-12"><hr></div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Mã sinh viên</label>
+                        <p class="fw-semibold mb-0">{{ current_user.student.student_code }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Ngày sinh</label>
+                        <p class="fw-semibold mb-0">{{ current_user.student.dob.strftime('%d/%m/%Y') if current_user.student.dob else 'N/A' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Lớp</label>
+                        <p class="fw-semibold mb-0">{{ current_user.student.classroom.name if current_user.student.classroom else 'Chưa phân lớp' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Ngành học</label>
+                        <p class="fw-semibold mb-0">{{ current_user.student.major.name if current_user.student.major else 'Chưa có' }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if current_user.is_lecturer() and current_user.lecturer %}
+                    <div class="col-12"><hr></div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Mã giảng viên</label>
+                        <p class="fw-semibold mb-0">{{ current_user.lecturer.lecturer_code }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Học vị</label>
+                        <p class="fw-semibold mb-0">{{ current_user.lecturer.degree or 'N/A' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Khoa/Bộ môn</label>
+                        <p class="fw-semibold mb-0">{{ current_user.lecturer.department or 'N/A' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Chuyên môn</label>
+                        <p class="fw-semibold mb-0">{{ current_user.lecturer.expertise or 'N/A' }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

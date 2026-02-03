@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block page_title %}Lịch giảng dạy{% endblock %}
+
+{% block content %}
+<div class="card fade-in">
+    <div class="card-header">
+        <i class="fas fa-calendar-week me-2 text-warning"></i>Thời khóa biểu giảng dạy
+    </div>
+    <div class="card-body">
+        <div class="schedule-grid">
+            {% set days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'] %}
+            
+            <div class="row">
+                {% for i in range(7) %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="day-card">
+                        <div class="day-header {% if schedule_by_day.get(i) %}has-schedule{% endif %}">
+                            <i class="fas fa-calendar-day me-2"></i>{{ days[i] }}
+                        </div>
+                        <div class="day-content">
+                            {% if schedule_by_day.get(i) %}
+                                {% for s in schedule_by_day.get(i) %}
+                                <div class="schedule-item">
+                                    <div class="schedule-time">
+                                        {{ s.start_time.strftime('%H:%M') }} - {{ s.end_time.strftime('%H:%M') }}
+                                    </div>
+                                    <div class="schedule-subject">{{ s.subject.name if s.subject else '-' }}</div>
+                                    <div class="schedule-info">
+                                        <span><i class="fas fa-users me-1"></i>{{ s.classroom.name if s.classroom else '-' }}</span>
+                                        <span><i class="fas fa-door-open me-1"></i>{{ s.room_name }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="no-schedule text-muted">
+                                    <i class="fas fa-minus-circle"></i>
+                                    <span>Không có lịch</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .day-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        height: 100%;
+    }
+    
+    .day-header {
+        background: #F3F4F6;
+        padding: 12px 16px;
+        font-weight: 600;
+        color: #6B7280;
+    }
+    
+    .day-header.has-schedule {
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+        color: white;
+    }
+    
+    .day-content {
+        padding: 16px;
+        min-height: 120px;
+    }
+    
+    .schedule-item {
+        padding: 12px;
+        background: #F9FAFB;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border-left: 3px solid #F59E0B;
+    }
+    
+    .schedule-time {
+        font-size: 12px;
+        color: #F59E0B;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    
+    .schedule-subject {
+        font-weight: 600;
+        color: #1F2937;
+        margin-bottom: 8px;
+    }
+    
+    .schedule-info {
+        display: flex;
+        gap: 16px;
+        font-size: 12px;
+        color: #6B7280;
+    }
+    
+    .no-schedule {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100px;
+        gap: 8px;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block page_title %}Trang chủ - Sinh viên{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Welcome Banner -->
+    <div class="welcome-banner mb-4 fade-in">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2>Xin chào, {{ student.full_name }}! 👋</h2>
+                <p class="mb-0 opacity-75">Chúc bạn có một ngày học tập hiệu quả!</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <span class="badge bg-light text-dark px-3 py-2">
+                    <i class="fas fa-id-card me-1"></i>{{ student.student_code }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card fade-in">
+                <div class="stat-icon primary">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ gpa }}</h3>
+                    <p>GPA Tích lũy</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card fade-in" style="animation-delay: 0.1s">
+                <div class="stat-icon success">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ total_subjects }}</h3>
+                    <p>Môn học đã hoàn thành</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card fade-in" style="animation-delay: 0.2s">
+                <div class="stat-icon info">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ total_credits }}</h3>
+                    <p>Tín chỉ tích lũy</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Today's Schedule -->
+        <div class="col-lg-8">
+            <div class="card fade-in" style="animation-delay: 0.3s">
+                <div class="card-header">
+                    <i class="fas fa-clock me-2 text-warning"></i>Lịch học hôm nay
+                </div>
+                <div class="card-body">
+                    {% if today_schedules %}
+                    <div class="schedule-list">
+                        {% for s in today_schedules %}
+                        <div class="schedule-item-card">
+                            <div class="schedule-time-badge">
+                                {{ s.start_time.strftime('%H:%M') }} - {{ s.end_time.strftime('%H:%M') }}
+                            </div>
+                            <div class="schedule-details">
+                                <h6>{{ s.subject.name if s.subject else '-' }}</h6>
+                                <p class="mb-0 text-muted small">
+                                    <i class="fas fa-chalkboard-teacher me-1"></i>{{ s.lecturer.full_name if s.lecturer else '-' }}
+                                    <span class="mx-2">|</span>
+                                    <i class="fas fa-door-open me-1"></i>{{ s.room_name }}
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-smile-beam fa-3x mb-3 opacity-50"></i>
+                        <p>Hôm nay bạn không có lịch học!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Grades -->
+        <div class="col-lg-4">
+            <div class="card fade-in" style="animation-delay: 0.4s">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-star me-2 text-warning"></i>Điểm gần đây</span>
+                    <a href="{{ url_for('student.grades') }}" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_grades %}
+                    {% for grade in recent_grades %}
+                    <div class="grade-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">{{ grade.subject.name if grade.subject else '-' }}</div>
+                                <small class="text-muted">{{ grade.semester }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge {{ 'badge-success' if grade.score_total and grade.score_total >= 5.5 else 'badge-danger' }}">
+                                    {{ grade.get_letter_grade() }}
+                                </span>
+                                <div class="small">{{ '%.1f'|format(grade.score_total) if grade.score_total else '-' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-clipboard fa-2x mb-2 opacity-50"></i>
+                        <p class="small">Chưa có điểm</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .welcome-banner {
+        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 16px;
+    }
+    
+    .schedule-item-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: #F9FAFB;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        border-left: 4px solid #F59E0B;
+    }
+    
+    .schedule-time-badge {
+        background: #F59E0B;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    
+    .schedule-details h6 {
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+    
+    .grade-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #E5E7EB;
+    }
+    
+    .grade-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}

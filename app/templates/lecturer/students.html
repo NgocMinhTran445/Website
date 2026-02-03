@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block page_title %}Danh sách Sinh viên{% endblock %}
+
+{% block content %}
+<div class="card fade-in">
+    <div class="card-header">
+        <i class="fas fa-user-graduate me-2 text-warning"></i>Chọn lớp để xem danh sách
+    </div>
+    <div class="card-body">
+        <form method="GET" class="mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Lớp học</label>
+                    <select name="class_id" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- Chọn lớp --</option>
+                        {% for c in classrooms %}
+                        <option value="{{ c.id }}" {% if selected_class == c.id %}selected{% endif %}>
+                            {{ c.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </form>
+        
+        {% if selected_class and students %}
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã SV</th>
+                        <th>Họ và tên</th>
+                        <th>Giới tính</th>
+                        <th>Ngày sinh</th>
+                        <th>Email</th>
+                        <th>SĐT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><span class="badge badge-primary">{{ student.student_code }}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="https://ui-avatars.com/api/?name={{ student.full_name }}&background=F59E0B&color=1F2937&size=32" 
+                                     class="rounded-circle me-2" width="32" height="32">
+                                {{ student.full_name }}
+                            </div>
+                        </td>
+                        <td>{{ student.gender or '-' }}</td>
+                        <td>{{ student.dob.strftime('%d/%m/%Y') if student.dob else '-' }}</td>
+                        <td>{{ student.user.email if student.user else '-' }}</td>
+                        <td>{{ student.phone or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif selected_class %}
+        <div class="text-center py-4 text-muted">
+            <i class="fas fa-users fa-3x mb-3 opacity-50"></i>
+            <p>Lớp này chưa có sinh viên</p>
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+            <i class="fas fa-hand-pointer fa-3x mb-3 opacity-50"></i>
+            <p>Vui lòng chọn lớp để xem danh sách sinh viên</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

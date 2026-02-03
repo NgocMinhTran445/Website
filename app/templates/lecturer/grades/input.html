@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block page_title %}Nhập điểm - {{ subject.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('lecturer.grades') }}" class="btn btn-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Quay lại
+    </a>
+</div>
+
+<div class="card fade-in">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+            <i class="fas fa-edit me-2 text-warning"></i>
+            Nhập điểm: <strong>{{ subject.name }}</strong> - Lớp <strong>{{ classroom.name }}</strong>
+        </span>
+        <span class="badge bg-info">{{ semester }}</span>
+    </div>
+    <div class="card-body p-0">
+        <form method="POST" action="{{ url_for('lecturer.save_grades') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="class_id" value="{{ classroom.id }}">
+            <input type="hidden" name="subject_id" value="{{ subject.id }}">
+            <input type="hidden" name="semester" value="{{ semester }}">
+            
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px">STT</th>
+                            <th>Mã SV</th>
+                            <th>Họ và tên</th>
+                            <th style="width: 120px">Chuyên cần (10%)</th>
+                            <th style="width: 120px">Giữa kỳ (30%)</th>
+                            <th style="width: 120px">Cuối kỳ (60%)</th>
+                            <th style="width: 100px">Tổng kết</th>
+                            <th style="width: 60px">Xếp loại</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        {% set grade = grades_dict.get(student.id) %}
+                        <tr>
+                            <td class="text-center">{{ loop.index }}</td>
+                            <td><span class="badge badge-primary">{{ student.student_code }}</span></td>
+                            <td>{{ student.full_name }}</td>
+                            <td>
+                                <input type="number" name="attendance_{{ student.id }}" 
+                                       class="form-control form-control-sm score-input" 
+                                       min="0" max="10" step="0.1"
+                                       value="{{ grade.score_attendance if grade and grade.score_attendance else '' }}"
+                                       data-student="{{ student.id }}">
+                            </td>
+                            <td>
+                                <input type="number" name="midterm_{{ student.id }}" 
+                                       class="form-control form-control-sm score-input" 
+                                       min="0" max="10" step="0.1"
+                                       value="{{ grade.score_midterm if grade and grade.score_midterm else '' }}"
+                                       data-student="{{ student.id }}">
+                            </td>
+                            <td>
+                                <input type="number" name="final_{{ student.id }}" 
+                                       class="form-control form-control-sm score-input" 
+                                       min="0" max="10" step="0.1"
+                                       value="{{ grade.score_final if grade and grade.score_final else '' }}"
+                                       data-student="{{ student.id }}">
+                            </td>
+                            <td class="text-center">
+                                <strong class="total-score" id="total_{{ student.id }}">
+                                    {{ '%.2f'|format(grade.score_total) if grade and grade.score_total else '-' }}
+                                </strong>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge {{ 'badge-success' if grade and grade.score_total and grade.score_total >= 5.5 else 'badge-danger' if grade and grade.score_total else 'bg-secondary' }}" id="letter_{{ student.id }}">
+                                    {{ grade.get_letter_grade() if grade else '-' }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                Lớp này chưa có sinh viên
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if students %}
+            <div class="p-3 bg-light">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Lưu điểm
+                </button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<style>
+    .score-input {
+        text-align: center;
+    }
+    
+    .score-input:focus {
+        border-color: #F59E0B;
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const scoreInputs = document.querySelectorAll('.score-input');
+    
+    scoreInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const studentId = this.dataset.student;
+            calculateTotal(studentId);
+        });
+    });
+    
+    function calculateTotal(studentId) {
+        const attendance = parseFloat(document.querySelector(`input[name="attendance_${studentId}"]`).value) || 0;
+        const midterm = parseFloat(document.querySelector(`input[name="midterm_${studentId}"]`).value) || 0;
+        const final = parseFloat(document.querySelector(`input[name="final_${studentId}"]`).value) || 0;
+        
+        const total = (attendance * 0.1) + (midterm * 0.3) + (final * 0.6);
+        
+        const totalEl = document.getElementById(`total_${studentId}`);
+        const letterEl = document.getElementById(`letter_${studentId}`);
+        
+        totalEl.textContent = total.toFixed(2);
+        
+        let letter = 'F';
+        let badgeClass = 'badge-danger';
+        
+        if (total >= 8.5) { letter = 'A'; badgeClass = 'badge-success'; }
+        else if (total >= 7.0) { letter = 'B'; badgeClass = 'badge-success'; }
+        else if (total >= 5.5) { letter = 'C'; badgeClass = 'badge-success'; }
+        else if (total >= 4.0) { letter = 'D'; badgeClass = 'bg-warning text-dark'; }
+        
+        letterEl.textContent = letter;
+        letterEl.className = `badge ${badgeClass}`;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block page_title %}Quản lý Lịch học{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-4">
+    <a href="{{ url_for('admin.add_schedule') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Thêm Lịch học
+    </a>
+</div>
+
+<div class="card fade-in">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Môn học</th>
+                        <th>Lớp</th>
+                        <th>Giảng viên</th>
+                        <th>Thứ</th>
+                        <th>Thời gian</th>
+                        <th>Phòng</th>
+                        <th>Học kỳ</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for schedule in schedules %}
+                    <tr>
+                        <td>{{ schedule.subject.name if schedule.subject else '-' }}</td>
+                        <td><span class="badge bg-info">{{ schedule.classroom.name if schedule.classroom else '-' }}</span></td>
+                        <td>{{ schedule.lecturer.full_name if schedule.lecturer else '-' }}</td>
+                        <td><span class="badge badge-primary">{{ schedule.get_day_name() }}</span></td>
+                        <td>{{ schedule.start_time.strftime('%H:%M') if schedule.start_time else '' }} - {{ schedule.end_time.strftime('%H:%M') if schedule.end_time else '' }}</td>
+                        <td>{{ schedule.room_name }}</td>
+                        <td>{{ schedule.semester }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin.edit_schedule', id=schedule.id) }}" class="btn btn-outline-primary"><i class="fas fa-edit"></i></a>
+                                <a href="{{ url_for('admin.delete_schedule', id=schedule.id) }}" class="btn btn-outline-danger" onclick="return confirm('Xác nhận xóa?')"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">Chưa có lịch học nào</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

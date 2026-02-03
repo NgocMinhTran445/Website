@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card fade-in">
+            <div class="card-header">
+                <i class="fas fa-user-graduate me-2 text-warning"></i>{{ title }}
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Mã sinh viên <span class="text-danger">*</span></label>
+                            {{ form.student_code(class="form-control", placeholder="VD: SV001") }}
+                            {% if form.student_code.errors %}
+                                <div class="text-danger small mt-1">{{ form.student_code.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                            {{ form.full_name(class="form-control", placeholder="Nhập họ và tên") }}
+                            {% if form.full_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.full_name.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Tên đăng nhập <span class="text-danger">*</span></label>
+                            {{ form.username(class="form-control", placeholder="Tên đăng nhập", readonly=student is defined) }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">{{ form.username.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            {{ form.email(class="form-control", placeholder="email@example.com") }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Mật khẩu {% if not student %}<span class="text-danger">*</span>{% endif %}</label>
+                            {{ form.password(class="form-control", placeholder="Để trống nếu không đổi" if student else "Nhập mật khẩu") }}
+                            {% if form.password.errors %}
+                                <div class="text-danger small mt-1">{{ form.password.errors[0] }}</div>
+                            {% endif %}
+                            {% if student %}
+                            <small class="text-muted">Để trống nếu không muốn đổi mật khẩu</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Ngày sinh</label>
+                            {{ form.dob(class="form-control", type="date") }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Giới tính</label>
+                            {{ form.gender(class="form-select") }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Số điện thoại</label>
+                            {{ form.phone(class="form-control", placeholder="0123456789") }}
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label">Địa chỉ</label>
+                            {{ form.address(class="form-control", placeholder="Nhập địa chỉ") }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Ngành học</label>
+                            {{ form.major_id(class="form-select") }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Lớp</label>
+                            {{ form.class_id(class="form-select") }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Năm nhập học</label>
+                            {{ form.enrollment_year(class="form-control", placeholder="VD: 2024") }}
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Lưu
+                        </button>
+                        <a href="{{ url_for('admin.students') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

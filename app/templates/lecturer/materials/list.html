@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block page_title %}Tài liệu{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-4">
+    <a href="{{ url_for('lecturer.add_material') }}" class="btn btn-primary">
+        <i class="fas fa-upload me-2"></i>Upload tài liệu
+    </a>
+</div>
+
+<div class="card fade-in">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Tài liệu</th>
+                        <th>Môn học</th>
+                        <th>Loại file</th>
+                        <th>Kích thước</th>
+                        <th>Lượt tải</th>
+                        <th>Ngày upload</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for material in materials %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="file-icon me-3">
+                                    <i class="fas fa-file-{{ 'pdf' if material.file_type == 'pdf' else 'word' if material.file_type in ['doc', 'docx'] else 'powerpoint' if material.file_type in ['ppt', 'pptx'] else 'excel' if material.file_type in ['xls', 'xlsx'] else 'archive' if material.file_type in ['zip', 'rar'] else 'alt' }} fa-2x text-warning"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">{{ material.title }}</div>
+                                    <small class="text-muted">{{ material.description[:50] + '...' if material.description and material.description|length > 50 else material.description or '' }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ material.subject.name if material.subject else '-' }}</td>
+                        <td><span class="badge bg-secondary">{{ material.file_type|upper }}</span></td>
+                        <td>{{ material.get_file_size_formatted() }}</td>
+                        <td>{{ material.download_count }}</td>
+                        <td>{{ material.created_at.strftime('%d/%m/%Y') if material.created_at else '' }}</td>
+                        <td>
+                            <a href="{{ url_for('lecturer.delete_material', id=material.id) }}" 
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Xác nhận xóa tài liệu này?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="fas fa-folder-open fa-3x mb-3 opacity-50"></i>
+                            <p>Chưa có tài liệu nào</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
