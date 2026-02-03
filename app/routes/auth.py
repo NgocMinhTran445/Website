@@ -2,10 +2,11 @@ from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import DataRequired, Length, Email
-from app.models import User
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, DateField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from app.models import User, Student, Lecturer
 from app import db
+from datetime import date
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -67,6 +68,84 @@ class ChangePasswordForm(FlaskForm):
     ])
     confirm_password = PasswordField('Xác nhận mật khẩu mới', validators=[DataRequired()])
     submit = SubmitField('Đổi mật khẩu')
+
+
+class RegisterForm(FlaskForm):
+    """Form đăng ký tài khoản"""
+    role = SelectField('Vai trò', 
+                      choices=[('student', 'Sinh viên'), ('lecturer', 'Giảng viên')],
+                      validators=[DataRequired(message='Vui lòng chọn vai trò')])
+    
+    # Thông tin tài khoản
+    username = StringField('Tên đăng nhập', validators=[
+        DataRequired(message='Vui lòng nhập tên đăng nhập'),
+        Length(min=3, max=64, message='Tên đăng nhập từ 3-64 ký tự')
+    ])
+    email = StringField('Email', validators=[
+        DataRequired(message='Vui lòng nhập email'),
+        Email(message='Email không hợp lệ')
+    ])
+    password = PasswordField('Mật khẩu', validators=[
+        DataRequired(message='Vui lòng nhập mật khẩu'),
+        Length(min=6, message='Mật khẩu phải có ít nhất 6 ký tự')
+    ])
+    confirm_password = PasswordField('Xác nhận mật khẩu', validators=[
+        DataRequired(message='Vui lòng xác nhận mật khẩu'),
+        EqualTo('password', message='Mật khẩu xác nhận không khớp')
+    ])
+    
+    # Thông tin cá nhân
+    full_name = StringField('Họ và tên', validators=[
+        DataRequired(message='Vui lòng nhập họ và tên'),
+        Length(min=3, max=100, message='Họ tên từ 3-100 ký tự')
+    ])
+    
+    # Thông tin cho sinh viên
+    student_code = StringField('Mã sinh viên', validators=[
+        Length(max=20, message='Mã sinh viên tối đa 20 ký tự')
+    ])
+    dob = DateField('Ngày sinh', format='%Y-%m-%d', validators=[])
+    gender = SelectField('Giới tính', 
+                        choices=[('', 'Chọn giới tính'), ('Nam', 'Nam'), ('Nữ', 'Nữ')],
+                        validators=[])
+    
+    # Thông tin cho giảng viên
+    lecturer_code = StringField('Mã giảng viên', validators=[
+        Length(max=20, message='Mã giảng viên tối đa 20 ký tự')
+    ])
+    department = StringField('Khoa/Bộ môn', validators=[
+        Length(max=100, message='Khoa/Bộ môn tối đa 100 ký tự')
+    ])
+    degree = SelectField('Học vị',
+                        choices=[('', 'Chọn học vị'), ('Cử nhân', 'Cử nhân'), ('ThS', 'Thạc sĩ'), 
+                                ('TS', 'Tiến sĩ'), ('PGS', 'Phó Giáo sư'), ('GS', 'Giáo sư')],
+                        validators=[])
+    
+    phone = StringField('Số điện thoại', validators=[
+        Length(max=15, message='Số điện thoại tối đa 15 ký tự')
+    ])
+    
+    submit = SubmitField('Đăng ký')
+    
+    def validate_username(self, field):
+        """Kiểm tra username đã tồn tại chưa"""
+        if User.query.filter_by(username=field.data).first():
+            raise ValidationError('Tên đăng nhập đã được sử dụng')
+    
+    def validate_email(self, field):
+        """Kiểm tra email đã tồn tại chưa"""
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError('Email đã được sử dụng')
+    
+    def validate_student_code(self, field):
+        """Kiểm tra mã sinh viên đã tồn tại chưa"""
+        if field.data and Student.query.filter_by(student_code=field.data).first():
+            raise ValidationError('Mã sinh viên đã được sử dụng')
+    
+    def validate_lecturer_code(self, field):
+        """Kiểm tra mã giảng viên đã tồn tại chưa"""
+        if field.data and Lecturer.query.filter_by(lecturer_code=field.data).first():
+            raise ValidationError('Mã giảng viên đã được sử dụng')
 
 
 # ==================== ROUTES ====================
@@ -143,3 +222,66 @@ def change_password():
         return redirect(url_for('auth.profile'))
     
     return render_template('auth/change_password.html', form=form)
+
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    """Xử lý đăng ký tài khoản"""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    
+    form = RegisterForm()
+    
+    if form.validate_on_submit():
+        try:
+            # Tạo user
+            user = User(
+                username=form.username.data,
+                email=form.email.data,
+                role=form.role.data
+            )
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.flush()  # Để lấy user.id
+            
+            # Tạo thông tin chi tiết theo role
+            if form.role.data == 'student':
+                if not form.student_code.data:
+                    flash('Vui lòng nhập mã sinh viên!', 'danger')
+                    return render_template('auth/register.html', form=form)
+                
+                student = Student(
+                    user_id=user.id,
+                    student_code=form.student_code.data,
+                    full_name=form.full_name.data,
+                    dob=form.dob.data if form.dob.data else None,
+                    gender=form.gender.data if form.gender.data else None,
+                    phone=form.phone.data if form.phone.data else None,
+                    enrollment_year=date.today().year
+                )
+                db.session.add(student)
+                
+            elif form.role.data == 'lecturer':
+                if not form.lecturer_code.data:
+                    flash('Vui lòng nhập mã giảng viên!', 'danger')
+                    return render_template('auth/register.html', form=form)
+                
+                lecturer = Lecturer(
+                    user_id=user.id,
+                    lecturer_code=form.lecturer_code.data,
+                    full_name=form.full_name.data,
+                    department=form.department.data if form.department.data else None,
+                    degree=form.degree.data if form.degree.data else None,
+                    phone=form.phone.data if form.phone.data else None
+                )
+                db.session.add(lecturer)
+            
+            db.session.commit()
+            flash(f'Đăng ký tài khoản thành công! Vui lòng đăng nhập.', 'success')
+            return redirect(url_for('auth.login'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Có lỗi xảy ra: {str(e)}', 'danger')
+    
+    return render_template('auth/register.html', form=form)

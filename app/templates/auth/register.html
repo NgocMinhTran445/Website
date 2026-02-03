@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng ký - {{ app_name }}{% endblock %}
+
+{% block auth_content %}
+<div class="register-page">
+    <div class="register-container">
+        <div class="register-left">
+            <div class="brand-section">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="brand-logo">
+                <h1>{{ app_short_name }}</h1>
+                <p>Đăng ký tài khoản mới</p>
+            </div>
+            
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Đăng ký nhanh chóng</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Bảo mật thông tin</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Truy cập đầy đủ tính năng</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="register-right">
+            <div class="register-form-wrapper">
+                <h2>Tạo tài khoản mới</h2>
+                <p class="text-muted mb-4">Điền thông tin để đăng ký</p>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} mb-3">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Chọn vai trò -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-user-tag me-2"></i>Vai trò
+                        </label>
+                        {{ form.role(class="form-select", id="roleSelect") }}
+                        {% if form.role.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.role.errors[0] }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Thông tin tài khoản -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-user me-2"></i>Tên đăng nhập <span class="text-danger">*</span>
+                            </label>
+                            {{ form.username(class="form-control", placeholder="Nhập tên đăng nhập") }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.username.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-envelope me-2"></i>Email <span class="text-danger">*</span>
+                            </label>
+                            {{ form.email(class="form-control", placeholder="email@example.com") }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-lock me-2"></i>Mật khẩu <span class="text-danger">*</span>
+                            </label>
+                            <div class="password-input">
+                                {{ form.password(class="form-control", placeholder="Tối thiểu 6 ký tự", id="password") }}
+                                <button type="button" class="toggle-password" onclick="togglePassword('password', 'toggleIcon1')">
+                                    <i class="fas fa-eye" id="toggleIcon1"></i>
+                                </button>
+                            </div>
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.password.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-lock me-2"></i>Xác nhận mật khẩu <span class="text-danger">*</span>
+                            </label>
+                            <div class="password-input">
+                                {{ form.confirm_password(class="form-control", placeholder="Nhập lại mật khẩu", id="confirm_password") }}
+                                <button type="button" class="toggle-password" onclick="togglePassword('confirm_password', 'toggleIcon2')">
+                                    <i class="fas fa-eye" id="toggleIcon2"></i>
+                                </button>
+                            </div>
+                            {% if form.confirm_password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.confirm_password.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Thông tin cá nhân -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-id-card me-2"></i>Họ và tên <span class="text-danger">*</span>
+                        </label>
+                        {{ form.full_name(class="form-control", placeholder="Nhập họ và tên đầy đủ") }}
+                        {% if form.full_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.full_name.errors[0] }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Form cho Sinh viên -->
+                    <div id="studentFields" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-id-badge me-2"></i>Mã sinh viên <span class="text-danger">*</span>
+                                </label>
+                                {{ form.student_code(class="form-control", placeholder="Ví dụ: SV001") }}
+                                {% if form.student_code.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.student_code.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar me-2"></i>Ngày sinh
+                                </label>
+                                {{ form.dob(class="form-control") }}
+                                {% if form.dob.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.dob.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-venus-mars me-2"></i>Giới tính
+                                </label>
+                                {{ form.gender(class="form-select") }}
+                                {% if form.gender.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.gender.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-phone me-2"></i>Số điện thoại
+                                </label>
+                                {{ form.phone(class="form-control", placeholder="Nhập số điện thoại") }}
+                                {% if form.phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.phone.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form cho Giảng viên -->
+                    <div id="lecturerFields" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-id-badge me-2"></i>Mã giảng viên <span class="text-danger">*</span>
+                                </label>
+                                {{ form.lecturer_code(class="form-control", placeholder="Ví dụ: GV001") }}
+                                {% if form.lecturer_code.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.lecturer_code.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-building me-2"></i>Khoa/Bộ môn
+                                </label>
+                                {{ form.department(class="form-control", placeholder="Ví dụ: Khoa CNTT") }}
+                                {% if form.department.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.department.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-graduation-cap me-2"></i>Học vị
+                                </label>
+                                {{ form.degree(class="form-select") }}
+                                {% if form.degree.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.degree.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-phone me-2"></i>Số điện thoại
+                                </label>
+                                {{ form.phone(class="form-control", placeholder="Nhập số điện thoại") }}
+                                {% if form.phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.phone.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 btn-lg mt-3">
+                        <i class="fas fa-user-plus me-2"></i>Đăng ký
+                    </button>
+                </form>
+                
+                <div class="login-link mt-4 text-center">
+                    <p class="text-muted">
+                        Đã có tài khoản? 
+                        <a href="{{ url_for('auth.login') }}" class="text-primary fw-bold">Đăng nhập ngay</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .register-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+        padding: 20px;
+    }
+
+    .register-container {
+        display: flex;
+        max-width: 1200px;
+        width: 100%;
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .register-left {
+        flex: 0 0 350px;
+        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        padding: 60px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        color: #1F2937;
+    }
+
+    .brand-section {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .brand-logo {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+        margin: 0 auto 20px;
+        display: block;
+    }
+
+    .brand-section h1 {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .brand-section p {
+        font-size: 16px;
+        opacity: 0.8;
+    }
+
+    .features-list {
+        margin-top: 30px;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .feature-item i {
+        font-size: 24px;
+        width: 30px;
+    }
+
+    .register-right {
+        flex: 1;
+        padding: 40px 50px;
+        overflow-y: auto;
+        max-height: 95vh;
+    }
+
+    .register-form-wrapper {
+        width: 100%;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .register-form-wrapper h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1F2937;
+        margin-bottom: 8px;
+    }
+
+    .password-input {
+        position: relative;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6B7280;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    .login-link a {
+        color: #F59E0B;
+        text-decoration: none;
+    }
+
+    .login-link a:hover {
+        color: #D97706;
+        text-decoration: underline;
+    }
+
+    @media (max-width: 992px) {
+        .register-left {
+            display: none;
+        }
+        
+        .register-right {
+            padding: 30px 25px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .register-right {
+            padding: 20px 15px;
+        }
+        
+        .register-form-wrapper h2 {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<script>
+    // Toggle hiển thị fields theo role
+    document.getElementById('roleSelect').addEventListener('change', function() {
+        const role = this.value;
+        const studentFields = document.getElementById('studentFields');
+        const lecturerFields = document.getElementById('lecturerFields');
+        
+        if (role === 'student') {
+            studentFields.style.display = 'block';
+            lecturerFields.style.display = 'none';
+        } else if (role === 'lecturer') {
+            studentFields.style.display = 'none';
+            lecturerFields.style.display = 'block';
+        } else {
+            studentFields.style.display = 'none';
+            lecturerFields.style.display = 'none';
+        }
+    });
+    
+    // Trigger change event khi trang load
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('roleSelect').dispatchEvent(new Event('change'));
+    });
+    
+    // Toggle password visibility
+    function togglePassword(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleIcon = document.getElementById(iconId);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+</script>
+{% endblock %}
